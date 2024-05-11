@@ -1,0 +1,69 @@
+{
+  "1": {
+    "inputs": {
+      "image": "image(3) (3).png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "3": {
+    "inputs": {
+      "resolution": [
+        "7",
+        0
+      ],
+      "image": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "OneFormer-ADE20K-SemSegPreprocessor",
+    "_meta": {
+      "title": "OneFormer ADE20K Segmentor"
+    }
+  },
+  "4": {
+    "inputs": {
+      "images": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "6": {
+    "inputs": {
+      "image": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
+    }
+  },
+  "7": {
+    "inputs": {
+      "mode": true,
+      "a": [
+        "6",
+        0
+      ],
+      "b": [
+        "6",
+        1
+      ]
+    },
+    "class_type": "ImpactMinMax",
+    "_meta": {
+      "title": "ImpactMinMax"
+    }
+  }
+}

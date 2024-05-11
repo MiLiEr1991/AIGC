@@ -1,0 +1,53 @@
+{
+  "1": {
+    "inputs": {
+      "image": "clipspace-mask-236976 (1).png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "5": {
+    "inputs": {
+      "image": "ComfyUI_temp_ckfks_00001_ (1).png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "6": {
+    "inputs": {
+      "mask_threshold": 250,
+      "gaussblur_radius": 8,
+      "invert_mask": false,
+      "images": [
+        "1",
+        0
+      ],
+      "masks": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "LamaRemoverIMG",
+    "_meta": {
+      "title": "Big lama Remover(IMG)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "images": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  }
+}

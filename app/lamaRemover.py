@@ -2,6 +2,7 @@
 # Create on 2024/04/30
 
 import base64
+
 from flask import request
 from flask import Blueprint
 
@@ -35,18 +36,20 @@ def _img2img_lamaRemover(test_reqParams=None):
         return {"code":0, "msg":"失败，{}".format(res_dict.get("msg")), "data":{}}
 
     else:
-        data = res_dict.get("data")
-        return {"code":0, "msg":"成功！", "data":data}
+        data = {"image": res_dict.get("image")}
+        return {"code":0, "msg":"成功！", "data": data}
 
 
 if __name__ == '__main__':
     from pprint import pprint
     image_path = "../services/img2img/tmp/image.png"
     mask_path = "../services/img2img/tmp/mask.png"
+
     testParams = {
         "image": base64.b64encode(open(image_path, "rb").read()),
         "mask": base64.b64encode(open(mask_path, "rb").read()),
     }
+
 
     res_dict = _img2img_lamaRemover(test_reqParams = testParams)
 

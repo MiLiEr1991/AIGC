@@ -8,7 +8,8 @@ import base64
 
 import sys
 # 获取当前文件所在的目录路径, 将当前文件目录添加到sys.path，以便可以导入该目录下的模块
-sys.path.append(os.path.dirname(__file__))
+sys.path.append(os.path.dirname(os.path.realpath((__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 from copy import deepcopy
 from services.utils.comfyAPI import get_images

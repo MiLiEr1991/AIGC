@@ -1,20 +1,23 @@
 # -*- coding: utf-8 -*-
-# Create on 2024/05/07
+# Create on 2024/04/30
 import io
 import os
 import json
 import uuid
 import base64
 
+import numpy as np
+
+from PIL import Image
 from copy import deepcopy
 from services.utils.comfyAPI import get_images
-from services.segment.SAM import segment_anything
 import websocket  # NOTE: 需要安装websocket-client (https://github.com/websocket-client/websocket-client)
+
 
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
-with open(os.path.join(BASE_DIR, './workflows/workflow_api_lama_remover.json'), 'rb') as f:
+with open(os.path.join(BASE_DIR, './workflows/workflow_api_playground_v25.json'), 'rb') as f:
     content = f.read()
     default_workflow = json.loads(content)
 
@@ -37,8 +40,11 @@ def load_comfy_workflow(workflow_json, prompt_dict):
 
     prompt_update = deepcopy(prompt_default)
 
-    prompt_update['1']['inputs']['image'] = prompt_dict.get("image_path")
-    prompt_update['5']['inputs']['image'] = prompt_dict.get("mask_path")
+    prompt_update['1']['inputs']['text'] = prompt_dict.get("pos_prompt")
+    prompt_update['2']['inputs']['text'] = prompt_dict.get("neg_prompt")
+    prompt_update['5']['inputs']['seed'] = np.random.randint(0, 999999)
+    prompt_update['12']['inputs']['value'] = prompt_dict.get("width")
+    prompt_update['13']['inputs']['value'] = prompt_dict.get("height")
 
     return prompt_update
 
@@ -76,29 +82,25 @@ def comfy_api(client_id, server_address, prompt):
 
 
 
-def inpaint_image_with_lama(Params):
 
+
+def create_image(Params):
+
+    user_txt_prompt = Params["promptText"]
+    user_txt_neg_prompt = Params["negPromptText"] if "negPromptText" in Params and Params["negPromptText"] else 'watermark, ugly'
+    user_img_prompt = Params["promptImage"] if "promptImage" in Params and Params["promptImage"] else None
+    image_size = Params["imageSize"] if "imageSize" in Params and Params["imageSize"] else [1024, 1024]
     client_id = Params["clientId"] if "clientId" in Params and Params["clientId"] else str(uuid.uuid4())
-    input_image_base64 = Params["image"]
-    input_mask_base64 = Params["mask"]
-    area_bbox = Params["bbox"] if "bbox" in Params and Params["bbox"] else None
     server_url = Params["serverUrl"] if "serverUrl" in Params and Params["serverUrl"] else "127.0.0.1:8188"
 
-    # 缓存图片
-    tmp_image_path = os.path.join(BASE_DIR, "./tmp/", str(uuid.uuid4())+".jpg")
-    tmp_mask_path = os.path.join(BASE_DIR, "./tmp/", str(uuid.uuid4())+".png")
-    base64ToImage(input_image_base64, save_path=tmp_image_path)
-    base64ToImage(input_mask_base64, save_path=tmp_mask_path)
-
-    if not input_mask_base64 is None:
-        mask = input_mask_base64
-    elif not area_bbox is None:
-        top_left_x, top_left_y, down_right_x, down_right_y = area_bbox[0], area_bbox[1], area_bbox[2], area_bbox[3]
 
 
     prompt_dict = dict()
-    prompt_dict["image_path"] = tmp_image_path
-    prompt_dict["mask_path"] = tmp_mask_path
+    prompt_dict["pos_prompt"] = user_txt_prompt
+    prompt_dict["neg_prompt"] = user_txt_neg_prompt
+    prompt_dict["seed"] = np.random.randint(0, 9999999)
+    prompt_dict["width"] = image_size[0]
+    prompt_dict["height"] = image_size[1]
 
     prompt_update = load_comfy_workflow(default_workflow, prompt_dict)
 
@@ -110,22 +112,20 @@ def inpaint_image_with_lama(Params):
     return seg_dict
 
 
-if __name__ == "__main__":
-    from pprint import pprint
-    from PIL import Image
 
-    image_path = "./tmp/image.png"
-    mask_path = "./tmp/mask.png"
-    testParams = {
-        "image": base64.b64encode(open(image_path, "rb").read()),
-        "mask": base64.b64encode(open(mask_path, "rb").read()),
+if __name__ == '__main__':
+    from pprint import pprint
+    test_reqParams = {
+    "promptText": "a cute cat",
+    "imageSize": [768, 1024]
     }
 
-    res = inpaint_image_with_lama(Params=testParams)
+    res = create_image(Params = test_reqParams)
     if res.get("flag") != 0:
         print("faild!")
     else:
         image_base64 = base64.b64decode(res['image'])
-        Image.open(io.BytesIO(image_base64)).save(image_path.replace(".png", "_lama_remove.jpg"))
+        Image.open(io.BytesIO(image_base64)).show()
+        print("end")
 
-    pprint(res)
+        pprint(res)

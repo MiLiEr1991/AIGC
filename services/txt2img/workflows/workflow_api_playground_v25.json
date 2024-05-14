@@ -1,0 +1,149 @@
+{
+  "1": {
+    "inputs": {
+      "text": "a cute dog",
+      "token_normalization": "none",
+      "weight_interpretation": "A1111",
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "BNK_CLIPTextEncodeAdvanced",
+    "_meta": {
+      "title": "CLIP Text Encode (Advanced)"
+    }
+  },
+  "2": {
+    "inputs": {
+      "text": "watermark",
+      "token_normalization": "none",
+      "weight_interpretation": "A1111",
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "BNK_CLIPTextEncodeAdvanced",
+    "_meta": {
+      "title": "CLIP Text Encode (Advanced)"
+    }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "playground-v2.5-1024px-aesthetic.fp16.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "5": {
+    "inputs": {
+      "seed": 175979423320872,
+      "steps": 50,
+      "cfg": 3,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": [
+        "10",
+        0
+      ],
+      "positive": [
+        "1",
+        0
+      ],
+      "negative": [
+        "2",
+        0
+      ],
+      "latent_image": [
+        "11",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "6": {
+    "inputs": {
+      "samples": [
+        "5",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "7": {
+    "inputs": {
+      "images": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "10": {
+    "inputs": {
+      "sampling": "edm_playground_v2.5",
+      "sigma_max": 120,
+      "sigma_min": 0.002,
+      "model": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingContinuousEDM",
+    "_meta": {
+      "title": "ModelSamplingContinuousEDM"
+    }
+  },
+  "11": {
+    "inputs": {
+      "width": [
+        "12",
+        0
+      ],
+      "height": [
+        "13",
+        0
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "12": {
+    "inputs": {
+      "value": 1024
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "INT Constant"
+    }
+  },
+  "13": {
+    "inputs": {
+      "value": 768
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "INT Constant"
+    }
+  }
+}

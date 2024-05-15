@@ -17,11 +17,15 @@ import numpy as np
 from PIL import Image
 from copy import deepcopy
 from services.utils.comfyAPI import get_images
+from services.utils.gpt import gpt_zhipu
+
 import websocket  # NOTE: 需要安装websocket-client (https://github.com/websocket-client/websocket-client)
 
 
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+
+default_neg_prompt = """ugly, deformed, noisy, blurry, distorted, out of focus, bad anatomy, extra limbs, poorly drawn face, poorly drawn hands, missing fingers,"""
 
 with open(os.path.join(BASE_DIR, './workflows/workflow_api_playground_v25.json'), 'rb') as f:
     content = f.read()
@@ -93,16 +97,21 @@ def comfy_api(client_id, server_address, prompt):
 def create_image(Params):
 
     user_txt_prompt = Params["promptText"]
-    user_txt_neg_prompt = Params["negPromptText"] if "negPromptText" in Params and Params["negPromptText"] else 'watermark, ugly'
+    user_txt_neg_prompt = Params["negPromptText"] if "negPromptText" in Params and Params["negPromptText"] else default_neg_prompt
     user_img_prompt = Params["promptImage"] if "promptImage" in Params and Params["promptImage"] else None
     image_size = Params["imageSize"] if "imageSize" in Params and Params["imageSize"] else [1024, 1024]
     client_id = Params["clientId"] if "clientId" in Params and Params["clientId"] else str(uuid.uuid4())
     server_url = Params["serverUrl"] if "serverUrl" in Params and Params["serverUrl"] else "127.0.0.1:8188"
+    use_gpt = Params["useGpt"] if "useGpt" in Params and Params["useGpt"] else True
 
+    if not use_gpt:
+        update_txt_prompt = user_txt_prompt
+    else:
+        update_txt_prompt = gpt_zhipu(user_txt_prompt)
 
 
     prompt_dict = dict()
-    prompt_dict["pos_prompt"] = user_txt_prompt
+    prompt_dict["pos_prompt"] = update_txt_prompt
     prompt_dict["neg_prompt"] = user_txt_neg_prompt
     prompt_dict["seed"] = np.random.randint(0, 9999999)
     prompt_dict["width"] = image_size[0]

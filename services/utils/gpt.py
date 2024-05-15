@@ -8,7 +8,7 @@ def gpt_zhipu(prompt, model="glm-3-turbo"):
     response = client.chat.completions.create(
     model=model, # 填写需要调用的模型名称
     messages=[{"role": "user",
-               "content": """学习下面参考示例, 其中"-》"是改写符号，学习改写的风格，\
+               "content": """学习下面参考示例改写成英文, 其中"-》"是改写符号，学习改写的风格，\
                     1. "老人的肖像" -》"Peter Pan aged 60 years old, with a black background" \
                     2. "森林中一直猫头鹰的特写" -》 "happy dreamy owl monster sitting on a tree branch, colorful glittering particles, forest background, contoured, surrealism, close up cute, detailed feathers, bioluminescence, leaves, ethereal, ice, looking in camera, sky, sleek, modern, fairytale, fantasy, by Andy Kehoe" \
                     3. "一个非洲女人的肖像" -》 "A portrait of an African American woman on a black background at night, photo realistic, ultra realistic" \
@@ -18,7 +18,7 @@ def gpt_zhipu(prompt, model="glm-3-turbo"):
                 """
                 },
               {"role": "user",
-               "content": "将 '{}' 按照示例改写，不超过100个字".format(prompt)}
+               "content": "将 '{}' 按照示例改写成英文，不超过100个字".format(prompt)}
             ],
     )
 

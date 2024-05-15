@@ -131,7 +131,7 @@ def create_image(Params):
 if __name__ == '__main__':
     from pprint import pprint
     test_reqParams = {
-    "promptText": "a cute cat",
+    "promptText": "一条可爱的小狗",
     "imageSize": [768, 1024]
     }
 

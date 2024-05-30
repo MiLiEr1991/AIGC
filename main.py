@@ -22,7 +22,7 @@ app.register_blueprint(app_query_running_status)
 
 if __name__== '__main__':
     import sys
-    port = 6666
+    port = 80
     if len(sys.argv) == 2:
         port = sys.argv[1]
     app.run(host='0.0.0.0', port=port, debug=False)

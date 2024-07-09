@@ -22,8 +22,11 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 with open(os.path.join(BASE_DIR, './workflows/workflow_api_create_avatar_dream_controlnet.json'), 'rb') as f:
     content = f.read()
-    default_workflow = json.loads(content)
-
+    default_workflow_A = json.loads(content)
+    
+with open(os.path.join(BASE_DIR, './workflows/workflow_api_create_avatar_dream_controlnet_instantid.json'), 'rb') as f:
+    content = f.read()
+    default_workflow_B = json.loads(content)
 
 def base64ToImage(image_base64, save_path):
     # 解码图片
@@ -86,15 +89,18 @@ def create_avatar(Params):
     client_id = Params["clientId"] if "clientId" in Params and Params["clientId"] else str(uuid.uuid4())
     input_image_base64 = Params["image"]
     server_url = Params["serverUrl"] if "serverUrl" in Params and Params["serverUrl"] else "127.0.0.1:8188"
-
+    avatar_type= Params["avatar_type"] if "avatar_type" in Params and Params["avatar_type"] else "0"
     # 缓存图片
     tmp_image_path = os.path.join(BASE_DIR, "./tmp/", str(uuid.uuid4())+".jpg")
     base64ToImage(input_image_base64, save_path=tmp_image_path)
 
     prompt_dict = dict()
     prompt_dict["image_path"] = tmp_image_path
+    if avatar_type=="0":
+        prompt_update = load_comfy_workflow(default_workflow_A, prompt_dict)
+    else:
+        prompt_update = load_comfy_workflow(default_workflow_B, prompt_dict)
 
-    prompt_update = load_comfy_workflow(default_workflow, prompt_dict)
 
     res_comfy = comfy_api(client_id, server_address=server_url, prompt=prompt_update)
 
@@ -111,6 +117,7 @@ if __name__ == "__main__":
     image_path = f"{BASE_DIR}/tmp/yaoming.png"
     testParams = {
         "image": base64.b64encode(open(image_path, "rb").read()),
+        "avatar_type":"1"
     }
 
     res = create_avatar(Params=testParams)

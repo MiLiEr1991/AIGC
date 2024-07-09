@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Create on 2024/04/30
+# Create on 2024/05/16
 import io
 import os
 import json
@@ -11,23 +11,15 @@ import sys
 sys.path.append(os.path.dirname(os.path.realpath((__file__))))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
-
-import numpy as np
-
-from PIL import Image
 from copy import deepcopy
 from services.utils.comfyAPI import get_images
-from services.utils.gpt import gpt_zhipu
-
+from services.segment.SAM import segment_anything
 import websocket  # NOTE: 需要安装websocket-client (https://github.com/websocket-client/websocket-client)
-
 
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
-default_neg_prompt = """ugly, deformed, noisy, blurry, distorted, out of focus, bad anatomy, extra limbs, poorly drawn face, poorly drawn hands, missing fingers,"""
-
-with open(os.path.join(BASE_DIR, './workflows/workflow_api_playground_v25.json'), 'rb') as f:
+with open(os.path.join(BASE_DIR, './workflows/workflow_api_lama_remover.json'), 'rb') as f:
     content = f.read()
     default_workflow = json.loads(content)
 
@@ -50,11 +42,7 @@ def load_comfy_workflow(workflow_json, prompt_dict):
 
     prompt_update = deepcopy(prompt_default)
 
-    prompt_update['1']['inputs']['text'] = prompt_dict.get("pos_prompt")
-    prompt_update['2']['inputs']['text'] = prompt_dict.get("neg_prompt")
-    prompt_update['5']['inputs']['seed'] = np.random.randint(0, 999999)
-    prompt_update['12']['inputs']['value'] = prompt_dict.get("width")
-    prompt_update['13']['inputs']['value'] = prompt_dict.get("height")
+    prompt_update['1']['inputs']['image'] = prompt_dict.get("image_path")
 
     return prompt_update
 
@@ -92,57 +80,43 @@ def comfy_api(client_id, server_address, prompt):
 
 
 
+def create_avatar(Params):
 
-
-def create_image(Params):
-
-    user_txt_prompt = Params["promptText"]
-    user_txt_neg_prompt = Params["negPromptText"] if "negPromptText" in Params and Params["negPromptText"] else default_neg_prompt
-    user_img_prompt = Params["promptImage"] if "promptImage" in Params and Params["promptImage"] else None
-    image_size = Params["imageSize"] if "imageSize" in Params and Params["imageSize"] else [1024, 1024]
     client_id = Params["clientId"] if "clientId" in Params and Params["clientId"] else str(uuid.uuid4())
+    input_image_base64 = Params["image"]
     server_url = Params["serverUrl"] if "serverUrl" in Params and Params["serverUrl"] else "127.0.0.1:8188"
-    use_gpt = Params["useGpt"] if "useGpt" in Params and Params["useGpt"] else True
 
-    if not use_gpt:
-        update_txt_prompt = user_txt_prompt
-    else:
-        update_txt_prompt = gpt_zhipu(user_txt_prompt)
-
+    # 缓存图片
+    tmp_image_path = os.path.join(BASE_DIR, "./tmp/", str(uuid.uuid4())+".jpg")
+    base64ToImage(input_image_base64, save_path=tmp_image_path)
 
     prompt_dict = dict()
-    prompt_dict["pos_prompt"] = update_txt_prompt
-    prompt_dict["neg_prompt"] = user_txt_neg_prompt
-    prompt_dict["seed"] = np.random.randint(0, 9999999)
-    prompt_dict["width"] = image_size[0]
-    prompt_dict["height"] = image_size[1]
+    prompt_dict["image_path"] = tmp_image_path
 
     prompt_update = load_comfy_workflow(default_workflow, prompt_dict)
 
-    seg_dict = comfy_api(client_id, server_address=server_url, prompt=prompt_update)
+    res_comfy = comfy_api(client_id, server_address=server_url, prompt=prompt_update)
 
-    if seg_dict.get('flag') == 0:
-        file_name = "txt2img_{}.png".format(str(client_id))
-        Image.open(io.BytesIO(seg_dict.get('image'))).save("../res/{}".format(file_name))
-        seg_dict['image'] = base64.b64encode(seg_dict.get('image')).decode()
+    if res_comfy.get('flag') == 0:
+        res_comfy['image'] = base64.b64encode(res_comfy.get('image')).decode()
 
-    return seg_dict
+    return res_comfy
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     from pprint import pprint
-    test_reqParams = {
-    "promptText": "一条可爱的小狗",
-    "imageSize": [768, 1024]
+    from PIL import Image
+
+    image_path = "./tmp/yaoming.png"
+    testParams = {
+        "image": base64.b64encode(open(image_path, "rb").read()),
     }
 
-    res = create_image(Params = test_reqParams)
+    res = create_avatar(Params=testParams)
     if res.get("flag") != 0:
         print("faild!")
     else:
         image_base64 = base64.b64decode(res['image'])
-        Image.open(io.BytesIO(image_base64)).show()
-        print("end")
+        Image.open(io.BytesIO(image_base64)).save(image_path.replace(".png", "_avatar.jpg"))
 
-        pprint(res)
+    pprint(res)

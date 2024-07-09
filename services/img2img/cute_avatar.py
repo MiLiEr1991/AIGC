@@ -10,6 +10,7 @@ import sys
 # 获取当前文件所在的目录路径, 将当前文件目录添加到sys.path，以便可以导入该目录下的模块
 sys.path.append(os.path.dirname(os.path.realpath((__file__))))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
 
 from copy import deepcopy
 from services.utils.comfyAPI import get_images
@@ -19,7 +20,7 @@ import websocket  # NOTE: 需要安装websocket-client (https://github.com/webso
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
-with open(os.path.join(BASE_DIR, './workflows/workflow_api_lama_remover.json'), 'rb') as f:
+with open(os.path.join(BASE_DIR, './workflows/workflow_api_create_avatar_dream_controlnet.json'), 'rb') as f:
     content = f.read()
     default_workflow = json.loads(content)
 
@@ -63,7 +64,7 @@ def comfy_api(client_id, server_address, prompt):
         if images:
             res_dict['flag'] = 0
             res_dict['msg'] = "成功！"
-            res_dict['image'] = images.get('7')[0]
+            res_dict['image'] = images.get('87')[0]
 
         else:
             res_dict['flag'] = 1
@@ -107,7 +108,7 @@ if __name__ == "__main__":
     from pprint import pprint
     from PIL import Image
 
-    image_path = "./tmp/yaoming.png"
+    image_path = f"{BASE_DIR}/tmp/yaoming.png"
     testParams = {
         "image": base64.b64encode(open(image_path, "rb").read()),
     }

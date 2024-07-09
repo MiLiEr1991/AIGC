@@ -46,14 +46,19 @@ def get_images(ws, prompt, client_id, server_address):
             continue  # 预览是二进制数据
 
     history = get_history(server_address, prompt_id)[prompt_id]
-    for o in history['outputs']:
-        for node_id in history['outputs']:
-            node_output = history['outputs'][node_id]
-            if 'images' in node_output:
-                images_output = []
-                for image in node_output['images']:
-                    image_data = get_image(server_address, image['filename'], image['subfolder'], image['type'])
-                    images_output.append(image_data)
+    # print("get_history:",history)
+    # print("history_outputs:",history['outputs'])
+    # for o in history['outputs']:
+    for node_id in history['outputs']:
+        node_output = history['outputs'][node_id]
+        # print("node_id:",node_id)
+        # print("node_output",node_output)
+        if 'images' in node_output:
+            images_output = []
+            for image in node_output['images']:
+                print("image:",image)
+                image_data = get_image(server_address, image['filename'], image['subfolder'], image['type'])
+                images_output.append(image_data)
             output_images[node_id] = images_output
 
     return output_images

@@ -24,6 +24,7 @@ import websocket  # NOTE: 需要安装websocket-client (https://github.com/webso
 
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+Base_DIR_service=os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 default_neg_prompt = """ugly, deformed, noisy, blurry, distorted, out of focus, bad anatomy, extra limbs, poorly drawn face, poorly drawn hands, missing fingers,"""
 
@@ -123,7 +124,7 @@ def create_image(Params):
 
     if seg_dict.get('flag') == 0:
         file_name = "txt2img_{}.png".format(str(client_id))
-        Image.open(io.BytesIO(seg_dict.get('image'))).save("../res/{}".format(file_name))
+        Image.open(io.BytesIO(seg_dict.get('image'))).save("{}/res/{}".format(Base_DIR_service,file_name))
         seg_dict['image'] = base64.b64encode(seg_dict.get('image')).decode()
 
     return seg_dict

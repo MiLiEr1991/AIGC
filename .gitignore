@@ -1,2 +1,4 @@
 *.pyc
 services/img2img/tmp/*
+services/res/*.png
+services/img2img/tmp/*.jpeg
